@@ -26,21 +26,21 @@
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
         <script>
-            const senderName = "{{sender}}"
+            const senderName = "{{name}}"
             const receiverName = "{{receiver}}"
             document.getElementById('s-name').innerHTML = senderName
             document.getElementById('r-name').innerHTML = receiverName
             const sendBtn = document.querySelector('#send');
             const messages = document.getElementById('chat');
             const messageBox = document.querySelector('#messageBox');
-            const user = (document.getElementById('name').innerText).slice(3).toLowerCase()
+            const user = (document.getElementById('name').innerText).slice(3)
             let sender = document.getElementById('s-on')
             let receiver = document.getElementById('r-on')
             var socket = io(document.location['origin']);
-            if (user==senderName.toLowerCase()) {
+            if (user==senderName) {
                 sender.innerText = "Online"; sender.style = 'color: rgb(107, 228, 107)'
                 receiver.innerText = "Offline"; receiver.style = 'color: red'
-            } else if (user==receiverName.toLowerCase()) {
+            } else if (user==receiverName) {
                 sender.innerText = "Offline"; sender.style = 'color: red'
                 receiver.innerText = "Online"; receiver.style = 'color: rgb(107, 228, 107)'
             }
@@ -110,7 +110,7 @@
 
             socket.on('typing', function(data) {
                 if (JSON.parse(data)['user'] != user) {
-                    if (JSON.parse(data)['user'] == senderName.toLowerCase()) {
+                    if (JSON.parse(data)['user'] == senderName) {
                         document.getElementById('s-on').innerText = `typing...`;
                     } else {
                         document.getElementById('r-on').innerText = `typing...`;
@@ -127,12 +127,12 @@
                 sender.innerText = "Offline"; sender.style = 'color: red'
                 receiver.innerText = "Offline"; receiver.style = 'color: red'
                 for (let x in data) {
-                    if (x==senderName.toLowerCase()) {
+                    if (x==senderName) {
                         sender.innerText = data[x];
                         if (data[x]=="Online") { 
                            sender.style = 'color: rgb(107, 228, 107)'
                         } else { sender.style = 'color: red' }
-                    } else if (x==receiverName.toLowerCase()) {
+                    } else if (x==receiverName) {
                         receiver.innerText = data[x];
                         if (data[x]=="Online") { 
                            receiver.style = 'color: rgb(107, 228, 107)'

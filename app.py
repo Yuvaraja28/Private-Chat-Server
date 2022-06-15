@@ -23,14 +23,16 @@ def verifyAuthentication(email, password):
     if email in knownUsers:
         if knownUsers[email] == password:
             global user
-            user = email.capitalize()
+            user = email
             authenticated = True
     return authenticated
 
 @app.route('/')
 @auth.login_required
 def login():
-    return render_template('index.html', name=user, sender=[x for x in config_file['accounts']][0], receiver=[x for x in config_file['accounts']][1])
+    receiver = config_file['accounts'].copy()
+    del receiver[user]
+    return render_template('index.html', name=user, receiver=[x for x in receiver][0])
 
 @sock.on('get_msgs')
 def send_msgs(data):
@@ -64,5 +66,7 @@ def handle_disconnect():
         active[x] = "Offline"
     emit("ping_client", {}, broadcast=True)
 
-
-sock.run(app, host="0.0.0.0", port=int(sys.argv[2]))
+try:
+    sock.run(app, host="0.0.0.0", port=int(sys.argv[2]))
+except IndexError:
+    print("USAGE: python3 app.py -p <web-port>")
