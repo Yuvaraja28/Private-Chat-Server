@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./static/w3.css">
+        <title>Private Chat</title>
+    </head>
+    <body>
+        <h1 id="name" style="text-align: center;font-family: cursive;">Hi {{name}}</h1>
+        <div class="header">Private Chat Server
+        </div>
+        <div class="on-header">
+            <span class="s-name" id="s-name">???</span> 
+            <span class="s-on" id="s-on">???</span> - 
+            <span class="r-name" id="r-name">???</span> 
+            <span class="r-on" id="r-on">???</span>
+        </div>
+        <div class="mainframe" id="chat">
+        </div>
+        <div class="flex-box">
+            <div><input type="text" id="messageBox" placeholder="Type your message here" style="background-color: #2f3136; color: white;border: black solid 3px;border-radius: 0px 0px 0px 8px;display: block; width: 15em;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold; margin-bottom: 10px; margin-left: 5%; padding: 10px;" onkeydown="catch_enter()" oninput="typing()"></div>
+            <div><button id="send" title="Send Message!" style="background-color: #2f3136; color: rgb(107, 228, 107);border: black solid 3px;border-radius: 0px 0px 8px 0px; margin-left: 5%; height: 43px;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;font-weight: bold;">
+                Send
+            </button></div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+        <script>
+            const senderName = "{{sender}}"
+            const receiverName = "{{receiver}}"
+            document.getElementById('s-name').innerHTML = senderName
+            document.getElementById('r-name').innerHTML = receiverName
+            const sendBtn = document.querySelector('#send');
+            const messages = document.getElementById('chat');
+            const messageBox = document.querySelector('#messageBox');
+            const user = (document.getElementById('name').innerText).slice(3).toLowerCase()
+            let sender = document.getElementById('s-on')
+            let receiver = document.getElementById('r-on')
+            var socket = io(document.location['origin']);
+            if (user==senderName.toLowerCase()) {
+                sender.innerText = "Online"; sender.style = 'color: rgb(107, 228, 107)'
+                receiver.innerText = "Offline"; receiver.style = 'color: red'
+            } else if (user==receiverName.toLowerCase()) {
+                sender.innerText = "Offline"; sender.style = 'color: red'
+                receiver.innerText = "Online"; receiver.style = 'color: rgb(107, 228, 107)'
+            }
+
+            socket.on('connect', function() {
+                socket.emit('get_msgs', {user:user})
+            });
+
+            function catch_enter() {
+                if(event.keyCode == 13) {
+                    document.getElementById('send').click();
+                }
+            }
+
+            function append_msg(time_data, user_data, msg_content) { 
+                var mainContainer = document.getElementById("chat"); 
+                var msg = document.createElement("div");
+                var content = document.createElement("div");
+                if (user_data==user) {
+                    var time = document.createElement("div");
+                    var name = document.createElement("span");
+                    name.className = "name"; name.innerHTML = user_data
+                    time.className = "time"; time.innerHTML = time_data; 
+                    msg.className = "s-msg";
+                    time.appendChild(name);
+                    msg.appendChild(time);
+                } else { 
+                    var name = document.createElement("div");
+                    var time = document.createElement("span");
+                    name.className = "name"; name.innerHTML = user_data 
+                    time.className = "time"; time.innerHTML = time_data; 
+                    msg.className = "r-msg";
+                    name.appendChild(time);
+                    msg.appendChild(name);
+                }             
+                content.className = "content"; content.innerHTML = msg_content;
+                msg.appendChild(content)   
+                mainContainer.appendChild(msg);
+                mainContainer.scrollTop = mainContainer.scrollHeight;
+            }
+
+            function sendwebhook(user, msg) {
+                socket.emit('webhook', `**${user}:** ${msg}`);
+            }
+
+            function typing() {
+                socket.emit('type', JSON.stringify({user:user}))
+            }
+            
+            function cleartype() {
+                document.getElementById('s-on').innerHTML = "Online"
+                document.getElementById('r-on').innerHTML = "Online"
+            }
+
+
+            sendBtn.onclick = function() {
+                if (messageBox.value != "") {
+                    socket.emit('message', JSON.stringify({user:user, msg:messageBox.value}));
+                    sendwebhook(user, messageBox.value);
+                    messageBox.value = '';
+                };
+            }
+
+            socket.on('msg', function(data) {
+                append_msg(new Date().toLocaleTimeString(), JSON.parse(data)['user'], JSON.parse(data)['msg']);
+            });
+
+            socket.on('typing', function(data) {
+                if (JSON.parse(data)['user'] != user) {
+                    if (JSON.parse(data)['user'] == senderName.toLowerCase()) {
+                        document.getElementById('s-on').innerText = `typing...`;
+                    } else {
+                        document.getElementById('r-on').innerText = `typing...`;
+                    }
+                    setTimeout(cleartype, 3000);
+                }
+            });
+
+            socket.on('ping_client', function(data) {
+                socket.emit('ping', {user:user})
+            })
+
+            socket.on('active_users', function(data) {
+                sender.innerText = "Offline"; sender.style = 'color: red'
+                receiver.innerText = "Offline"; receiver.style = 'color: red'
+                for (let x in data) {
+                    if (x==senderName.toLowerCase()) {
+                        sender.innerText = data[x];
+                        if (data[x]=="Online") { 
+                           sender.style = 'color: rgb(107, 228, 107)'
+                        } else { sender.style = 'color: red' }
+                    } else if (x==receiverName.toLowerCase()) {
+                        receiver.innerText = data[x];
+                        if (data[x]=="Online") { 
+                           receiver.style = 'color: rgb(107, 228, 107)'
+                        } else { receiver.style = 'color: red' }
+                    }
+                }
+            })
+
+        </script>
+    </body>
+</html>

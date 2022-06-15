@@ -1,0 +1,7 @@
+{
+    "accounts": {"guest": "guest1", "guest2": "guest22"},
+    "discord_webhook": { "avatar_url": null, 
+                         "username": null, 
+                         "hook_url": null
+                        }
+}
