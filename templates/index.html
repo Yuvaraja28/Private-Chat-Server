@@ -33,20 +33,14 @@
             const sendBtn = document.querySelector('#send');
             const messages = document.getElementById('chat');
             const messageBox = document.querySelector('#messageBox');
-            const user = (document.getElementById('name').innerText).slice(3)
             let sender = document.getElementById('s-on')
             let receiver = document.getElementById('r-on')
             var socket = io(document.location['origin']);
-            if (user==senderName) {
-                sender.innerText = "Online"; sender.style = 'color: rgb(107, 228, 107)'
-                receiver.innerText = "Offline"; receiver.style = 'color: red'
-            } else if (user==receiverName) {
-                sender.innerText = "Offline"; sender.style = 'color: red'
-                receiver.innerText = "Online"; receiver.style = 'color: rgb(107, 228, 107)'
-            }
+            sender.innerText = "Online"; sender.style = 'color: rgb(107, 228, 107)'
+            receiver.innerText = "Offline"; receiver.style = 'color: red'
 
             socket.on('connect', function() {
-                socket.emit('get_msgs', {user:user})
+                socket.emit('get_msgs', {user:senderName})
             });
 
             function catch_enter() {
@@ -59,7 +53,7 @@
                 var mainContainer = document.getElementById("chat"); 
                 var msg = document.createElement("div");
                 var content = document.createElement("div");
-                if (user_data==user) {
+                if (user_data==senderName) {
                     var time = document.createElement("div");
                     var name = document.createElement("span");
                     name.className = "name"; name.innerHTML = user_data
@@ -87,7 +81,7 @@
             }
 
             function typing() {
-                socket.emit('type', JSON.stringify({user:user}))
+                socket.emit('type', JSON.stringify({user:senderName}))
             }
             
             function cleartype() {
@@ -98,18 +92,22 @@
 
             sendBtn.onclick = function() {
                 if (messageBox.value != "") {
-                    socket.emit('message', JSON.stringify({user:user, msg:messageBox.value}));
-                    sendwebhook(user, messageBox.value);
+                    let msg = messageBox.value
                     messageBox.value = '';
+                    append_msg(new Date().toLocaleTimeString(), senderName, msg);
+                    socket.emit('message', JSON.stringify({user:senderName, msg:msg}));
+                    sendwebhook(senderName, msg);
                 };
             }
 
             socket.on('msg', function(data) {
-                append_msg(new Date().toLocaleTimeString(), JSON.parse(data)['user'], JSON.parse(data)['msg']);
+                if (JSON.parse(data)['user']!=senderName) {
+                    append_msg(new Date().toLocaleTimeString(), JSON.parse(data)['user'], JSON.parse(data)['msg']);
+                }
             });
 
             socket.on('typing', function(data) {
-                if (JSON.parse(data)['user'] != user) {
+                if (JSON.parse(data)['user'] != senderName) {
                     if (JSON.parse(data)['user'] == senderName) {
                         document.getElementById('s-on').innerText = `typing...`;
                     } else {
@@ -120,7 +118,7 @@
             });
 
             socket.on('ping_client', function(data) {
-                socket.emit('ping', {user:user})
+                socket.emit('ping', {user:senderName})
             })
 
             socket.on('active_users', function(data) {
