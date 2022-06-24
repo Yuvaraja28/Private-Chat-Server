@@ -9,6 +9,9 @@ With config.json        :-
     - Here you can Change the Account UserName and Password
     - Config for Discord Webhook
 ```
+|Config-Pic|
+|---|
+|![config](https://user-images.githubusercontent.com/64340067/175651405-b79a924a-90ee-49ca-bbd5-6fb1836fbfc3.png)|
 
 ## Usage on Linux
 ```sh
@@ -35,8 +38,9 @@ Use command line : python3 app.py -p <web-port>
       └──────────> python3 app.py -p 80
 ```
 
-## Screenshot
-![image](https://user-images.githubusercontent.com/64340067/173899486-f12378be-804e-4e2a-8431-052805c13d98.png)
+|Screenshot|
+|---|
+|![image](https://user-images.githubusercontent.com/64340067/173899486-f12378be-804e-4e2a-8431-052805c13d98.png)|
 
 
 ## Contact Developer
