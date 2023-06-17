@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./static/css/style.css">
+        <title>Private Chat</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">Private Chat Server - Yuvaraja.M<br>MVIT 1st Year CSE-B</div>
+            <div aria-label={{currentUser}} class="mainframe" id="chat">
+            </div>
+            <div class="message-data-box">
+                <input type="text" id="messageBox" placeholder="Type your message here" onkeydown="catch_enter()">
+            </div>
+        </div>
+        <script src="./static/js/socketio.js"></script>
+        <script>
+            var socket = io(document.location['origin']);
+            currentUser = document.getElementById("chat").ariaLabel
+            const messages = document.getElementById('chat');
+            const messageBox = document.querySelector('#messageBox');
+
+            socket.on('connect', function() {
+                socket.emit('get_msgs', {})
+            });
+
+            function catch_enter() {
+                if(event.keyCode == 13) {
+                    if (messageBox.value != "") {
+                        let msg = messageBox.value
+                        messageBox.value = '';
+                        time = new Date().toLocaleTimeString()
+                        append_msg(time, currentUser, msg);
+                        socket.emit('message', JSON.stringify({user:currentUser, msg:msg, time:time}));
+                    };
+
+                }
+            }
+
+            function append_msg(time_data, user_data, msg_content) { 
+                var mainContainer = document.getElementById("chat"); 
+                var msg = document.createElement("div");
+                var content = document.createElement("div");
+                if (user_data.toLowerCase() == currentUser.toLowerCase()) {
+                    var time = document.createElement("div");
+                    var name = document.createElement("span");
+                    name.className = "name"; name.innerHTML = user_data
+                    time.className = "time"; time.innerHTML = time_data; 
+                    msg.className = "s-msg";
+                    time.appendChild(name);
+                    msg.appendChild(time);
+                } else { 
+                    var name = document.createElement("div");
+                    var time = document.createElement("span");
+                    name.className = "name"; name.innerHTML = user_data 
+                    time.className = "time"; time.innerHTML = time_data; 
+                    msg.className = "r-msg";
+                    name.appendChild(time);
+                    msg.appendChild(name);
+                }             
+                content.className = "content"; content.innerHTML = msg_content;
+                msg.appendChild(content)   
+                mainContainer.appendChild(msg);
+                mainContainer.scrollTop = mainContainer.scrollHeight;
+            }
+
+            socket.on('msg', function(data) {
+                if (JSON.parse(data)['user']!=currentUser) {
+                    append_msg(JSON.parse(data).time, JSON.parse(data).user, JSON.parse(data).msg);
+                }
+            });
+            
+            socket.on('all_msgs', function(data) {
+                const parsedData = JSON.parse(data)
+                for(x in parsedData){
+                    innerparsedData = JSON.parse(parsedData[x])
+                    append_msg(innerparsedData.time, innerparsedData.user, innerparsedData.msg);
+                }
+            });
+
+        </script>
+    </body>
+</html>
