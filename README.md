@@ -11,7 +11,7 @@ With config.json        :-
 ```
 |Config-Pic|
 |---|
-|![config](https://user-images.githubusercontent.com/64340067/175651405-b79a924a-90ee-49ca-bbd5-6fb1836fbfc3.png)|
+|![config.json](https://github.com/Yuvaraja28/Private-Chat-Server/assets/64340067/2f5d44f4-330a-46d0-a344-f8c34539e130)|
 
 ## Usage on Linux
 ```sh
@@ -40,11 +40,11 @@ Use command line : python3 app.py -p <web-port>
 
 |Screenshot|
 |---|
-|![image](https://user-images.githubusercontent.com/64340067/173899486-f12378be-804e-4e2a-8431-052805c13d98.png)|
+|![image](https://github.com/Yuvaraja28/Private-Chat-Server/assets/64340067/b8c52cac-5bd4-4794-a0b7-6bc3d30f5a84)|
 
 
 ## Contact Developer
 ```sh
- Discord - Yuvaraja#1073
+ Discord - Yuvaraja28
 ```
 
